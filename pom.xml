@@ -27,7 +27,7 @@
     <version>7.0</version>
   </parent>
   <groupId>org.xwiki.contrib</groupId>
-  <artifactId>application-appwithin-minutes-charts-and-data</artifactId>
+  <artifactId>appwithinminutes-charts</artifactId>
   <version>1.0</version>
   <packaging>xar</packaging>
   <name>AppWithin Minutes Charts and Data</name>

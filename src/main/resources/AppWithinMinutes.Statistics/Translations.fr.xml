@@ -38,7 +38,7 @@
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
-  <hidden>false</hidden>
+  <hidden>true</hidden>
   <content>awm.chartmacro.title=Macro pour graphiques AWM
 awm.chartmacro.desc=Cette macro permet de créer des graphiques et tableaux de données pour AWM
 awm.chartmacro.doc.parameter=Paramètre
@@ -109,5 +109,6 @@ awm.statistics.continue=Continuer
 awm.statistics.insert=Pour insérer ce graphique dans une autre page utiliser le code suivant:
 awm.statistics.chooseapp=Choisir une Application:
 awm.statistics.chooseclass=Choisir une classe:
-awm.statistics.showclasses=Montrer les classes:</content>
+awm.statistics.showclasses=Montrer les classes:
+awm.statistics.panel.title=Graphiques</content>
 </xwikidoc>

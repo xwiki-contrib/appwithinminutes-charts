@@ -108,7 +108,8 @@ awm.statistics.continue=Continue
 awm.statistics.insert=To insert this chart in another page use the following code:
 awm.statistics.chooseapp=Choose Application:
 awm.statistics.chooseclass=Choose Class:
-awm.statistics.showclasses=Show classes</content>
+awm.statistics.showclasses=Show classes
+awm.statistics.panel.title=Charts</content>
   <object>
     <name>AppWithinMinutes.Statistics.Translations</name>
     <number>0</number>
