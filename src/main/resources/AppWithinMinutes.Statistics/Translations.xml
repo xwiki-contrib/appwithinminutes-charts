@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc version="1.3" reference="AppWithinMinutes.Statistics.Translations" locale="">
+  <web>AppWithinMinutes.Statistics</web>
+  <name>Translations</name>
+  <language/>
+  <defaultLanguage>en</defaultLanguage>
+  <translation>0</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <creationDate>1514761200000</creationDate>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1514761200000</date>
+  <contentUpdateDate>1514761200000</contentUpdateDate>
+  <version>1.1</version>
+  <title/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>false</hidden>
+  <content>awm.chartmacro.title=AppWithinMinutes Chart Macro
+awm.chartmacro.desc=This macro allows to show chart and data tables for AppWithinMinutes applications.
+awm.chartmacro.doc.parameter=Parameter
+awm.chartmacro.doc.desc=Description
+awm.chartmacro.doc.defaultValue=Default Value
+awm.chartmacro.doc.empty=Empty
+awm.chartmacro.example=Example
+awm.chartmacro.example.simple=Simple Chart 
+awm.chartmacro.example.function=Chart with function
+awm.chartmacro.name=AppWithinMinutes Chart
+awm.chartmacro.exception=Exception
+awm.chartmacro.query=Query
+awm.chartmacro.data=Data
+awm.chartmacro.chart=Chart
+awm.chartmacro.nodata=No data
+awm.chartmacro.number=Number
+rendering.macro.awmchart.name=AppWithinMinutes Chart Macro
+rendering.macro.awmchart.description=This macro allows to show chart and data tables for AppWithinMinutes applications
+rendering.macro.awmchart.parameter.app.name=Application Name
+rendering.macro.awmchart.parameter.app.description=Application Name to get the data for the chart (corresponds to the space)
+rendering.macro.awmchart.parameter.className.name=Class Name 
+rendering.macro.awmchart.parameter.className.description=Class Name used alternatively to an Application name 
+rendering.macro.awmchart.parameter.category.name=Category 
+rendering.macro.awmchart.parameter.category.description=Field on which the counting is made
+rendering.macro.awmchart.parameter.type.name=Chart type
+rendering.macro.awmchart.parameter.type.description=Chart type (pie / bar / bar3D)
+rendering.macro.awmchart.parameter.title.name=Title
+rendering.macro.awmchart.parameter.title.description=Title of the chart
+rendering.macro.awmchart.parameter.width.name=Width
+rendering.macro.awmchart.parameter.width.description=Width of the chart
+rendering.macro.awmchart.parameter.height.name=Height
+rendering.macro.awmchart.parameter.height.description=Height of the chart
+rendering.macro.awmchart.parameter.table.name=Display Table
+rendering.macro.awmchart.parameter.table.description=Display of the data table (0/1)
+rendering.macro.awmchart.parameter.chart.name=Display Chart
+rendering.macro.awmchart.parameter.chart.description=Display of the chart (0/1)
+rendering.macro.awmchart.parameter.chartClasses.name=Chart CSS Classes
+rendering.macro.awmchart.parameter.chartClasses.description=CSS Classes to add to the chart 'div'
+rendering.macro.awmchart.parameter.tableClasses.name=Table CSS Classes 
+rendering.macro.awmchart.parameter.tableClasses.description=CSS Classes to add to the table 'div'
+rendering.macro.awmchart.parameter.useRow.description=Display of a bootstrap row (0/1)
+rendering.macro.awmchart.parameter.colors.name=Colors
+rendering.macro.awmchart.parameter.colors.description=Colors to use for the chart (separated by commas)
+rendering.macro.awmchart.parameter.addParams.name=Chart Additional parameters
+rendering.macro.awmchart.parameter.addParams.description=Additional parameters for the chart (see the [[Chart macro documentation&gt;&gt;url:http://extensions.xwiki.org/xwiki/bin/view/Extension/Chart%20Macro])
+rendering.macro.awmchart.parameter.fromHQL.name=From HQL
+rendering.macro.awmchart.parameter.fromHQL.description=Additional HQL to add to the from part of the query
+rendering.macro.awmchart.parameter.whereHQL.name=Where HQL
+rendering.macro.awmchart.parameter.whereHQL.description=Additional HQL to add to the where part of the query
+rendering.macro.awmchart.parameter.function.name=Function
+rendering.macro.awmchart.parameter.function.description=Function to apply to the category field
+rendering.macro.awmchart.parameter.aggregate.name=Aggregate field
+rendering.macro.awmchart.parameter.aggregate.description=Aggregate field to use instead of count
+rendering.macro.awmchart.parameter.aggregateFunction.name=Aggregate Function
+rendering.macro.awmchart.parameter.aggregateFunction.description=Function to apply to the aggregate
+awm.statistics.title=Statistics and Charts
+awm.statistics.desc=This screens shows AppWithinMinutes statistics:
+awm.statistics.field=Field:
+awm.statistics.type=Type:
+awm.statistics.type.pie=Pie
+awm.statistics.type.bar=Bar
+awm.statistics.type.bar3D=Bar 3D
+awm.statistics.function=Function (optional):
+awm.statistics.aggregate=Aggregate (optional):
+awm.statistics.aggregateFunction=Aggregate Function (optional):
+awm.statistics.continue=Continue
+awm.statistics.insert=To insert this chart in another page use the following code:
+awm.statistics.chooseapp=Choose Application:
+awm.statistics.chooseclass=Choose Class:
+awm.statistics.showclasses=Show classes</content>
+  <object>
+    <name>AppWithinMinutes.Statistics.Translations</name>
+    <number>0</number>
+    <className>XWiki.TranslationDocumentClass</className>
+    <guid>3490d71c-b442-41cc-9b10-5fe4fccfbb85</guid>
+    <class>
+      <name>XWiki.TranslationDocumentClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <scope>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>scope</name>
+        <number>1</number>
+        <prettyName>Scope</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>GLOBAL|WIKI|USER|ON_DEMAND</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </scope>
+    </class>
+    <property>
+      <scope>WIKI</scope>
+    </property>
+  </object>
+</xwikidoc>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc version="1.3" reference="AppWithinMinutes.Statistics.WebHome" locale="">
+  <web>AppWithinMinutes.Statistics</web>
+  <name>WebHome</name>
+  <language/>
+  <defaultLanguage>fr</defaultLanguage>
+  <translation>0</translation>
+  <creator>xwiki:XWiki.Admin</creator>
+  <creationDate>1514761200000</creationDate>
+  <parent>Main.WebHome</parent>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <date>1514761200000</date>
+  <contentUpdateDate>1514761200000</contentUpdateDate>
+  <version>1.1</version>
+  <title>$services.localization.render("awm.statistics.title")</title>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <content>{{velocity}}
+
+$services.localization.render("awm.statistics.desc")
+
+#if($request.appname||$request.className)
+#if($request.className)
+ #set($className = $request.className)
+#else
+ #set($appDoc = $xwiki.getDocument($request.appname))
+ #set($className = $appDoc.getValue("class"))
+#end
+#set($classDoc = $xwiki.getDocument($className).getxWikiClass())
+{{html}}
+&lt;form action=""&gt;
+&lt;table&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;th&gt;
+$services.localization.render("awm.statistics.field")
+&lt;/th&gt;
+&lt;td&gt;
+&lt;select name="property"&gt;
+#foreach($prop in $classDoc.getProperties())
+&lt;option value="${escapetool.xml($prop.name)}" #if($request.property==$prop.name)selected#end&gt;${prop.prettyName}&lt;/option&gt;
+#end
+&lt;/select&gt;
+&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;th&gt;
+$services.localization.render("awm.statistics.type")
+&lt;/th&gt;
+&lt;td&gt;
+&lt;select name="type"&gt;
+&lt;option value="pie" #if($request.type=="pie")selected#end&gt;$services.localization.render("awm.statistics.type.pie")&lt;/option&gt;
+&lt;option value="bar" #if($request.type=="bar")selected#end&gt;$services.localization.render("awm.statistics.type.bar")
+&lt;/option&gt;
+&lt;option value="bar3D" #if($request.type=="bar3D")selected#end&gt;$services.localization.render("awm.statistics.type.bar3D")
+&lt;/option&gt;
+&lt;/select&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;
+&lt;th&gt;$services.localization.render("awm.statistics.function")&lt;/th&gt;
+&lt;td&gt;&lt;input type="text" size="40" name="function" value="$!{escapetool.xml($!request.function)}" /&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;th&gt;$services.localization.render("awm.statistics.aggregate")&lt;/th&gt;
+&lt;td&gt;&lt;input type="text" size="40" name="aggregate" value="$!{escapetool.xml($!request.aggregate)}" /&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;th&gt;$services.localization.render("awm.statistics.aggregateFunction")&lt;/th&gt;
+&lt;td&gt;&lt;input type="text" size="40" name="aggregateFunction" value="$!{escapetool.xml($!request.aggregateFunction)}" /&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;/th&gt;
+&lt;td&gt;
+#if($request.appname)
+&lt;input name="appname" type="hidden" value="${escapetool.xml($request.appname)}" /&gt;
+#end
+#if($request.className)
+&lt;input name="className" type="hidden" value="${escapetool.xml($request.className)}" /&gt;
+#end
+&lt;input type="submit" value="$services.localization.render("awm.statistics.continue")" class="button" /&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/form&gt;
+{{/html}}
+
+#if($request.property)
+{{awmchart type="${request.type}" #if($request.appname)app="${appDoc.space}"#end #if($request.className)className="${className}"#end  category="${request.property}" function="$!{request.function}" aggregate="$!{request.aggregate}" aggregateFunction="$!{request.aggregateFunction}"/}}
+
+$services.localization.render("awm.statistics.insert")
+{{{
+{{awmchart type="${request.type}" #if($request.appname)app="${appDoc.space}"#end #if($request.className)className="${className}"#end category="${request.property}" function="$!{request.function}" aggregate="$!{request.aggregate}" aggregateFunction="$!{request.aggregateFunction}" /}}
+}}}
+
+#end
+#elseif($request.showClasses)
+#set($list = $xwiki.classList)
+{{html}}
+&lt;form action=""&gt;
+$services.localization.render("awm.statistics.chooseclass") &lt;select name="className"&gt;
+#foreach($className in $list)
+&lt;option value="${escapetool.xml($className)}"&gt;${className}&lt;/option&gt;
+#end
+&lt;/select&gt;
+&lt;input type="submit" value="$services.localization.render("awm.statistics.continue")" class="button" /&gt;
+&lt;/form&gt;
+{{/html}}
+#else
+#set($list = $services.query.xwql("from doc.object(AppWithinMinutes.LiveTableClass) as obj order by doc.title").execute())
+{{html}}
+&lt;form action=""&gt;
+$services.localization.render("awm.statistics.chooseapp") &lt;select name="appname"&gt;
+#foreach($appname in $list)
+&lt;option value="${escapetool.xml($appname)}"&gt;${xwiki.getDocument($appname).getDisplayTitle()}&lt;/option&gt;
+#end
+&lt;/select&gt;
+&lt;input type="submit" value="$services.localization.render("awm.statistics.continue")" class="button" /&gt;
+&lt;/form&gt;
+{{/html}}
+
+[[$services.localization.render("awm.statistics.showclasses")&gt;&gt;||queryString="showClasses=1"]]
+#end
+{{/velocity}}</content>
+</xwikidoc>
