@@ -24,18 +24,18 @@
   <parent>
     <groupId>org.xwiki.commons</groupId>
     <artifactId>xwiki-commons-pom</artifactId>
-    <version>5.4.4</version>
+    <version>7.0</version>
   </parent>
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>application-appwithin-minutes-charts-and-data</artifactId>
   <version>1.0</version>
   <packaging>xar</packaging>
-  <name>XWiki Application - AppWithin Minutes Charts and Data</name>
+  <name>AppWithin Minutes Charts and Data</name>
   <description>Allows creating charts and data table for AppWithinMinutes applications</description>
   <developers>
     <developer>
       <id>ldubost</id>
-      <name>ldubost</name>
+      <name>Ludovic Dubost</name>
     </developer>
   </developers>
  <build>
