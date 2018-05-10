@@ -1,25 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!--
- * See the NOTICE file distributed with this work for additional
- * information regarding copyright ownership.
- *
- * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
--->
-
 <xwikidoc version="1.3" reference="AppWithinMinutes.Statistics.AWMChartMacro" locale="">
   <web>AppWithinMinutes.Statistics</web>
   <name>AWMChartMacro</name>
@@ -72,6 +52,10 @@ $services.localization.render("awm.chartmacro.desc")
 #docline("function", "")
 #docline("aggregate", "")
 #docline("aggregateFunction", "sum")
+#docline("orderColumn", "")
+#docline("orderDirection", "desc")
+#docline("columnTitle", "")
+#docline("aggregateTitle", "")
 
 == $services.localization.render("awm.chartmacro.example") ==
 
@@ -86,10 +70,19 @@ $services.localization.render("awm.chartmacro.desc")
 === $services.localization.render("awm.chartmacro.example.function") ===
 
 {{{
-{{awmchart app="Help.Applications.Movies" category="date1" type="pie" title="bar" width="500" height="500" table="1" chartClasses="col-md-6 col-sm-12" function="year" /}}
+{{awmchart app="Help.Applications.Movies" category="date1" type="line" title="Movies by year" width="500" height="500" table="1" chartClasses="col-md-6 col-sm-12" function="year" orderColumn="date1" orderDirection="asc" aggregateTitle="Movies by year" /}}
+
+{{awmchart app="Help.Applications.Movies" category="date1" type="line" title="Movies by month" width="500" height="500" table="1" function="year(prop.value)*100+month(prop.value)" chartClasses="col-md-6 col-sm-12" orderColumn="date1" orderDirection="asc" aggregateTitle="Movies by month" columnTitle="Release Month" /}}
+
+{{awmchart app="Help.Applications.Movies" category="doc.creationDate" type="Movies by creation month" title="Movies by creation month" width="500" height="500" table="1" function="year(doc.creationDate)*100+month(doc.creationDate)" chartClasses="col-md-6 col-sm-12" orderColumn="doc.creationDate" orderDirection="asc" aggregateTitle="Movies by creation month" columnTitle="Page creation month" /}}
 }}}
 
-{{awmchart app="Help.Applications.Movies" category="date1" type="pie" title="bar" width="500" height="500" table="1" chartClasses="col-md-6 col-sm-12" function="year" /}}
+{{awmchart app="Help.Applications.Movies" category="date1" type="line" title="Movies by year" width="500" height="500" table="1" chartClasses="col-md-6 col-sm-12" function="year" orderColumn="date1" orderDirection="asc" aggregateTitle="Movies by year" /}}
+
+{{awmchart app="Help.Applications.Movies" category="date1" type="line" title="Movies by month" width="500" height="500" table="1" function="year(prop.value)*100+month(prop.value)" chartClasses="col-md-6 col-sm-12" orderColumn="date1" orderDirection="asc" aggregateTitle="Movies by month" columnTitle="Release Month" /}}
+
+{{awmchart app="Help.Applications.Movies" category="doc.creationDate" type="line" title="Movies by creation month" width="500" height="500" table="1" function="year(doc.creationDate)*100+month(doc.creationDate)" chartClasses="col-md-6 col-sm-12" orderColumn="doc.creationDate" orderDirection="asc" aggregateTitle="Movies by creation month" columnTitle="Page creation month" /}}
+
 
 {{/velocity}}</content>
   <object>
@@ -303,7 +296,23 @@ $services.localization.render("awm.chartmacro.desc")
   #set($aggProp = "sum(aggprop.value)")
  #end
 #end
-#chartmacro_getTableName($className $category)
+#set($queryParams = [])
+#set($discard = $queryParams.add($className))
+#if($category.startsWith("doc."))
+ #set($propAlias = $category)
+ #set($tableName = "")
+ #set($colWhere = "")
+ #set($categoryPrettyName = $category)
+#else
+ #chartmacro_getTableName($className $category)
+ #set($tableName = ",${tableName} as ${tableAlias}")
+ #set($colWhere = "and obj.id=prop.id.id and prop.id.name=?")
+ #set($discard = $queryParams.add($category))
+ #set($categoryPrettyName = $xwiki.getDocument($className).getxWikiClass().get($category).getPrettyName())
+#end
+#if($xcontext.macro.params.columnTitle &amp;&amp; $xcontext.macro.params.columnTitle!="")
+ #set($categoryPrettyName = $xcontext.macro.params.columnTitle)
+#end
 #if($xcontext.macro.params.function &amp;&amp; $xcontext.macro.params.function!="")
  #set($function = $xcontext.macro.params.function)
  #if($function.contains("("))
@@ -312,23 +321,36 @@ $services.localization.render("awm.chartmacro.desc")
   #set($propAlias = "${function}(${propAlias})")
  #end
 #end
-#set($query = "select $propAlias , ${aggProp} from XWikiDocument as doc, BaseObject as obj, $tableName as $tableAlias $!{aggTableName} $!{xcontext.macro.params.fromHQL} where doc.fullName=obj.name and obj.className=? and obj.id=prop.id.id and prop.id.name=? $!{aggWhere} $!{xcontext.macro.params.whereHQL} group by ${propAlias} order by 2 desc")
+#if($xcontext.macro.params.orderDirection &amp;&amp; $xcontext.macro.params.orderDirection=="asc")
+ #set($orderdir = "asc")
+#else
+ #set($orderdir = "desc")
+#end
+#if(!$xcontext.macro.params.orderColumn || $xcontext.macro.params.orderColumn!=$xcontext.macro.params.category)
+ #set($order = "order by 2 ${orderdir}")
+#else
+ #set($order = "order by 1 ${orderdir}")
+#end
+#set($query = "select $propAlias , ${aggProp} from XWikiDocument as doc, BaseObject as obj $!{tableName} $!{aggTableName} $!{xcontext.macro.params.fromHQL} where doc.fullName=obj.name and obj.className=? $!{colWhere} $!{aggWhere} $!{xcontext.macro.params.whereHQL} group by ${propAlias} ${order}")
 #if($request.debug)
-$services.localization.render("awm.chartmacro.query"): {{{ ${query} $className $category }}}
+$services.localization.render("awm.chartmacro.query"): {{{ ${query} ${queryParams} }}}
 #end
 #set($list = [])
 #try()
-#set($list = $xwiki.search($query, 0, 0, [$className, $category]))
+#set($list = $xwiki.search($query, 0, 0, $queryParams))
 #end
 #if($exception)
 $services.localization.render("awm.chartmacro.exception"): {{{ $exception }}}
 #end
-#set($categoryPrettyName = $xwiki.getDocument($className).getxWikiClass().get($category).getPrettyName())
 #if($request.debug)
 $services.localization.render("awm.chartmacro.data"): $list
 #end
 #if($list &amp;&amp; $list.size()&gt;0)
-#set($countPrettyName = $services.localization.render("awm.chartmacro.number"))
+#if($xcontext.macro.params.aggregateTitle&amp;&amp;$xcontext.macro.params.aggregateTitle!="")
+ #set($countPrettyName = $xcontext.macro.params.aggregateTitle)
+#else
+ #set($countPrettyName = $services.localization.render("awm.chartmacro.number"))
+#end
 #set($nblines = $list.size())
 #set($nblines = $nblines + 1)
 #set($useRow = true)
@@ -370,6 +392,9 @@ $services.localization.render("awm.chartmacro.chart"): {{{ $chartString }}}
 #if($value.contains("."))
 #set($value = $xwiki.getDocument($value).getTitle())
 #end
+#if(!$value || $value.trim()=="")
+ #set($value = $services.localization.render("awm.chartmacro.novalue"))
+#end
 | $!value | $number
 #end
 {{/chart}}
@@ -387,6 +412,9 @@ $services.localization.render("awm.chartmacro.chart"): {{{ $chartString }}}
 #end
 #if($value.contains("."))
 #set($value = $xwiki.getDocument($value).getTitle())
+#end
+#if(!$value || $value.trim()=="")
+ #set($value = $services.localization.render("awm.chartmacro.novalue"))
 #end
 | $!value | $number
 #end
@@ -1545,6 +1573,270 @@ $services.localization.render("awm.chartmacro.nodata")
     </property>
     <property>
       <name>aggregateFunction</name>
+    </property>
+  </object>
+  <object>
+    <name>AppWithinMinutes.Statistics.AWMChartMacro</name>
+    <number>17</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>69122540-bd39-4050-84a5-ab79377213c1</guid>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+    </class>
+    <property>
+      <defaultValue/>
+    </property>
+    <property>
+      <description>Column to sort the results on. The default is the first aggregated column</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>orderColumn</name>
+    </property>
+  </object>
+  <object>
+    <name>AppWithinMinutes.Statistics.AWMChartMacro</name>
+    <number>18</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>3864c7e4-c0f4-44a6-bd0f-fa0f1f6e7f34</guid>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+    </class>
+    <property>
+      <defaultValue/>
+    </property>
+    <property>
+      <description>Direction to sort on (asc / desc)</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>orderDirection</name>
+    </property>
+  </object>
+  <object>
+    <name>AppWithinMinutes.Statistics.AWMChartMacro</name>
+    <number>19</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>ebdf293d-9985-4f29-b8b8-66046ba87bf7</guid>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+    </class>
+    <property>
+      <defaultValue/>
+    </property>
+    <property>
+      <description>Title to use for the group column</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>columnTitle</name>
+    </property>
+  </object>
+  <object>
+    <name>AppWithinMinutes.Statistics.AWMChartMacro</name>
+    <number>20</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>1b35ad53-b417-45c3-a60e-18d62514f637</guid>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+    </class>
+    <property>
+      <defaultValue/>
+    </property>
+    <property>
+      <description>Title to use for the aggregate column</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>aggregateTitle</name>
     </property>
   </object>
 </xwikidoc>
