@@ -28,7 +28,7 @@
   </parent>
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>appwithinminutes-charts</artifactId>
-  <version>1.1-SNAPSHOT</version>
+  <version>1.1</version>
   <packaging>xar</packaging>
   <name>AppWithin Minutes Charts and Data</name>
   <description>Allows creating charts and data table for AppWithinMinutes applications</description>
@@ -60,7 +60,7 @@
     <connection>scm:git:git://github.com/xwiki-contrib/appwithinminutes-charts.git</connection>
     <developerConnection>scm:git:git@github.com:xwiki-contrib/appwithinminutes-charts.git</developerConnection>
     <url>https://github.com/xwiki-contrib/appwithinminutes-charts</url>
-    <tag>HEAD</tag>
+    <tag>appwithinminutes-charts-1.1</tag>
   </scm>
   <distributionManagement>
     <repository>
