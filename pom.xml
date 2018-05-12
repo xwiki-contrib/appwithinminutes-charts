@@ -28,7 +28,7 @@
   </parent>
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>appwithinminutes-charts</artifactId>
-  <version>1.3-SNAPSHOT</version>
+  <version>1.2-SNAPSHOT</version>
   <packaging>xar</packaging>
   <name>AppWithin Minutes Charts and Data</name>
   <description>Allows creating charts and data table for AppWithinMinutes applications</description>
