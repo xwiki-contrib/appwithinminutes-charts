@@ -1,25 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!--
- * See the NOTICE file distributed with this work for additional
- * information regarding copyright ownership.
- *
- * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
--->
-
 <xwikidoc version="1.3" reference="AppWithinMinutes.Statistics.Translations" locale="">
   <web>AppWithinMinutes.Statistics</web>
   <name>Translations</name>
@@ -65,7 +45,7 @@ rendering.macro.awmchart.parameter.className.description=Class Name used alterna
 rendering.macro.awmchart.parameter.category.name=Category 
 rendering.macro.awmchart.parameter.category.description=Field on which the counting is made
 rendering.macro.awmchart.parameter.type.name=Chart type
-rendering.macro.awmchart.parameter.type.description=Chart type (pie / bar / bar3D)
+rendering.macro.awmchart.parameter.type.description=Chart type (pie / bar / bar3D / line)
 rendering.macro.awmchart.parameter.title.name=Title
 rendering.macro.awmchart.parameter.title.description=Title of the chart
 rendering.macro.awmchart.parameter.width.name=Width
@@ -110,6 +90,7 @@ awm.statistics.type=Type:
 awm.statistics.type.pie=Pie
 awm.statistics.type.bar=Bar
 awm.statistics.type.bar3D=Bar 3D
+awm.statistics.type.line=Line
 awm.statistics.function=Function (optional):
 awm.statistics.aggregate=Aggregate (optional):
 awm.statistics.aggregateFunction=Aggregate Function (optional):
