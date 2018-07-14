@@ -1,25 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!--
- * See the NOTICE file distributed with this work for additional
- * information regarding copyright ownership.
- *
- * This is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as
- * published by the Free Software Foundation; either version 2.1 of
- * the License, or (at your option) any later version.
- *
- * This software is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this software; if not, write to the Free
- * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
- * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
--->
-
 <xwikidoc version="1.3" reference="AppWithinMinutes.Statistics.AWMChartMacro" locale="">
   <web>AppWithinMinutes.Statistics</web>
   <name>AWMChartMacro</name>
@@ -92,12 +72,16 @@ $services.localization.render("awm.chartmacro.desc")
 {{{
 {{awmchart app="Help.Applications.Movies" category="date1" type="line" title="Movies by year" width="500" height="500" table="1" chartClasses="col-md-6 col-sm-12" function="year" orderColumn="date1" orderDirection="asc" aggregateTitle="Movies by year" /}}
 
+{{awmchart app="Help.Applications.Movies" category="date1" type="line" title="Movies by year" width="500" height="500" table="1" chartClasses="col-md-6 col-sm-12" function="year" orderColumn="date1" orderDirection="asc" aggregateTitle="Movies by year" nb="2" /}}
+
 {{awmchart app="Help.Applications.Movies" category="date1" type="line" title="Movies by month" width="500" height="500" table="1" function="year(prop.value)*100+month(prop.value)" chartClasses="col-md-6 col-sm-12" orderColumn="date1" orderDirection="asc" aggregateTitle="Movies by month" columnTitle="Release Month" /}}
 
 {{awmchart app="Help.Applications.Movies" category="doc.creationDate" type="Movies by creation month" title="Movies by creation month" width="500" height="500" table="1" function="year(doc.creationDate)*100+month(doc.creationDate)" chartClasses="col-md-6 col-sm-12" orderColumn="doc.creationDate" orderDirection="asc" aggregateTitle="Movies by creation month" columnTitle="Page creation month" /}}
 }}}
 
 {{awmchart app="Help.Applications.Movies" category="date1" type="line" title="Movies by year" width="500" height="500" table="1" chartClasses="col-md-6 col-sm-12" function="year" orderColumn="date1" orderDirection="asc" aggregateTitle="Movies by year" /}}
+
+{{awmchart app="Help.Applications.Movies" category="date1" type="line" title="Movies by year" width="500" height="500" table="1" chartClasses="col-md-6 col-sm-12" function="year" orderColumn="date1" orderDirection="asc" aggregateTitle="Movies by year" nb="2" /}}
 
 {{awmchart app="Help.Applications.Movies" category="date1" type="line" title="Movies by month" width="500" height="500" table="1" function="year(prop.value)*100+month(prop.value)" chartClasses="col-md-6 col-sm-12" orderColumn="date1" orderDirection="asc" aggregateTitle="Movies by month" columnTitle="Release Month" /}}
 
@@ -252,10 +236,10 @@ $services.localization.render("awm.chartmacro.desc")
   #elseif($propType == 'TextAreaClass' || $propType == 'UsersClass' || $propType == 'GroupsClass')
     #set($tableName = 'LargeStringProperty')
   #elseif($propType == 'StaticListClass' || $propType == 'DBListClass' || $propType == 'DBTreeListClass﻿' || $propType == 'PageClass')
-    #set($multiSelect = $propClass.get($colname).getProperty('multiSelect').getValue())
-    #set($relationalStorage = $propClass.get($colname).getProperty('relationalStorage').getValue())
-    #if($multiSelect == 1)
-      #if($relationalStorage == 1)
+    #set($fmultiSelect = $propClass.get($propFinalSubFieldName).getProperty('multiSelect').getValue())
+    #set($frelationalStorage = $propClass.get($propFinalSubFieldName).getProperty('relationalStorage').getValue())
+    #if($fmultiSelect == 1)
+      #if($frelationalStorage == 1)
         #set($tableName = 'DBStringListProperty')
         #set($tableAlias = "prop join prop.list list")
         #set($propAlias = "list")
@@ -274,6 +258,9 @@ $services.localization.render("awm.chartmacro.desc")
  * Get the property class and type for a given column.
  *#
 #macro(chartmacro_getPropertyClassAndType $propClassName $colname)
+  #set($propFinalClassName = $propClassName)
+  #set($propFinalName = $colname)
+  #set($propFinalSubFieldName = $colname)
   #if($propClassName != '')
     #set($propClass = $xwiki.getDocument($propClassName).getxWikiClass())
   #else
@@ -282,6 +269,25 @@ $services.localization.render("awm.chartmacro.desc")
   #set($propType = '')
   #if($propClass.getPropertyNames().contains($colname))
     #set($propType = "$!{propClass.get($colname).type}")
+  #end
+  ## if we cannot find the field, maybe it's a linked field
+  #if($propType == '')
+   #set($propFinalName = $colname.replaceAll("(.*?)_.*",'$1'))
+   #set($propFinalSubFieldName = $colname.replaceAll(".*?_(.*)",'$1'))
+   #set($field = $propClass.get($propFinalName))
+   #set($fieldType = $field.type)
+   #if($fieldType.contains("DBListClass"))
+    #set($multiSelect = $field.getPropertyClass().get("multiSelect").getValue())
+    #if($multiSelect == 1)
+     #set($relationalStorage = $field.getPropertyClass().get("relationalStorage").getValue())
+    #end
+    #set($sql = $field.getPropertyClass().get("sql").getValue())
+    #set($propFinalClassName = $sql.replaceAll(".*[.]className.*?=.*?'(.*?)'.*",'$1'))
+    #set($propClass = $xwiki.getDocument($propFinalClassName).getxWikiClass())
+    #if($propClass.getPropertyNames().contains($propFinalSubFieldName))
+     #set($propType = "$!{propClass.get($propFinalSubFieldName).type}")
+    #end
+   #end
   #end
 #end
 #if($xcontext.macro.params.app)
@@ -319,9 +325,9 @@ $services.localization.render("awm.chartmacro.desc")
   #set($aggTableName = ",${tableName} as aggprop")
   #set($aggWhere = "and obj.id=aggprop.id.id and aggprop.id.name='${aggregate}'")
   #if($xcontext.macro.params.aggregateFunction &amp;&amp; $xcontext.macro.params.aggregateFunction!="")
-   #set($aggProp = "${xcontext.macro.params.aggregateFunction}(aggprop.value)")  
+    #set($aggProp = "${xcontext.macro.params.aggregateFunction}(aggprop.value)")  
   #else
-   #set($aggProp = "sum(aggprop.value)")
+    #set($aggProp = "sum(aggprop.value)")
   #end
  #end
 #end
@@ -334,10 +340,24 @@ $services.localization.render("awm.chartmacro.desc")
  #set($categoryPrettyName = $category)
 #else
  #chartmacro_getTableName($className $category)
- #set($tableName = ",${tableName} as ${tableAlias}")
- #set($colWhere = "and obj.id=prop.id.id and prop.id.name=?")
- #set($discard = $queryParams.add($category))
- #set($categoryPrettyName = $xwiki.getDocument($className).getxWikiClass().get($category).getPrettyName())
+ #if($className != $propFinalClassName)
+   ## in this case we have a linked field
+   #if($relationalStorage == 1)
+    #set($tableName = ", BaseObject as obj2, DBStringListProperty as fieldprop join fieldprop.list list2, ${tableName} as ${tableAlias}")   
+    #set($colWhere = "and obj.id=fieldprop.id.id and fieldprop.id.name=? and list2=obj2.name and obj2.className=? and obj2.id=prop.id.id and prop.id.name=?")
+   #else
+    #set($tableName = ", BaseObject as obj2, StringProperty as fieldprop, ${tableName} as ${tableAlias}")
+    #set($colWhere = "and obj.id=fieldprop.id.id and fieldprop.id.name='${propFinalName}' and fieldprop.value=obj2.name and obj2.className='${propFinalClassName}' and obj2.id=prop.id.id and prop.id.name='${propFinalSubFieldName}'")
+   #end
+   ##set($discard = $queryParams.add($propFinalName))
+   ##set($discard = $queryParams.add($propFinalClassName))
+   ##set($discard = $queryParams.add($propFinalSubFieldName))
+ #else
+   #set($tableName = ",${tableName} as ${tableAlias}")
+   #set($colWhere = "and obj.id=prop.id.id and prop.id.name=?")
+   #set($discard = $queryParams.add($category))
+ #end
+ #set($categoryPrettyName = $xwiki.getDocument($propFinalClassName).getxWikiClass().get($propFinalSubFieldName).getPrettyName())
 #end
 #if($xcontext.macro.params.columnTitle &amp;&amp; $xcontext.macro.params.columnTitle!="")
  #set($categoryPrettyName = $xcontext.macro.params.columnTitle)
@@ -360,13 +380,21 @@ $services.localization.render("awm.chartmacro.desc")
 #else
  #set($order = "order by 1 ${orderdir}")
 #end
-#set($query = "select $propAlias , ${aggProp} from XWikiDocument as doc, BaseObject as obj $!{tableName} $!{aggTableName} $!{xcontext.macro.params.fromHQL} where doc.fullName=obj.name and obj.className=? $!{colWhere} $!{aggWhere} $!{xcontext.macro.params.whereHQL} group by ${propAlias} ${order}")
+#set($nb = 0)
+#if($xcontext.macro.params.nb)
+ #set($nb = $util.parseInt($xcontext.macro.params.nb))
+#end
+#set($havingHQL = "")
+#if($xcontext.macro.params.havingHQL &amp;&amp; $xcontext.macro.params.havingHQL!="")
+ #set($havingHQL = "having ${xcontext.macro.params.havingHQL}")
+#end
+#set($query = "select $propAlias , ${aggProp} from XWikiDocument as doc, BaseObject as obj $!{tableName} $!{aggTableName} $!{xcontext.macro.params.fromHQL} where doc.fullName=obj.name and obj.className=? $!{colWhere} $!{aggWhere} $!{xcontext.macro.params.whereHQL} group by ${propAlias} ${havingHQL} ${order}")
 #if($request.debug)
 $services.localization.render("awm.chartmacro.query"): {{{ ${query} ${queryParams} }}}
 #end
 #set($list = [])
 #try()
-#set($list = $xwiki.search($query, 0, 0, $queryParams))
+#set($list = $xwiki.search($query, $nb, 0, $queryParams))
 #end
 #if($exception)
 $services.localization.render("awm.chartmacro.exception"): {{{ $exception }}}
@@ -1938,6 +1966,204 @@ $services.localization.render("awm.chartmacro.nodata")
     </property>
     <property>
       <name>category</name>
+    </property>
+  </object>
+  <object>
+    <name>AppWithinMinutes.Statistics.AWMChartMacro</name>
+    <number>22</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>9eb2c0ff-75b0-496e-9eea-602434e6fb85</guid>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+    </class>
+    <property>
+      <defaultValue/>
+    </property>
+    <property>
+      <description>Maximum number of items to retrieve from query</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>nb</name>
+    </property>
+  </object>
+  <object>
+    <name>AppWithinMinutes.Statistics.AWMChartMacro</name>
+    <number>23</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>30c17808-a936-4201-bb7e-df715bcdbfb1</guid>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+    </class>
+    <property>
+      <defaultValue>1</defaultValue>
+    </property>
+    <property>
+      <description>Group items representing less than a certain percentage of total</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>group</name>
+    </property>
+  </object>
+  <object>
+    <name>AppWithinMinutes.Statistics.AWMChartMacro</name>
+    <number>24</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>95be59f7-2c59-42ee-92e6-b7cb895750c7</guid>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+    </class>
+    <property>
+      <defaultValue/>
+    </property>
+    <property>
+      <description>HQL to add to the having part of the HQL Query</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>havingHQL</name>
     </property>
   </object>
 </xwikidoc>
