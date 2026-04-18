@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
+
 <!--
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,19 +20,16 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc version="1.3" reference="AppWithinMinutes.Statistics.AWMChartMacro" locale="">
+<xwikidoc version="1.3" reference="AppWithinMinutes.Statistics.AWMChartMacro" locale="" encoding="UTF-8">
   <web>AppWithinMinutes.Statistics</web>
   <name>AWMChartMacro</name>
   <language/>
   <defaultLanguage/>
   <translation>0</translation>
   <creator>xwiki:XWiki.Admin</creator>
-  <creationDate>1514761200000</creationDate>
   <parent>AppWithinMinutes.Statistics.WebHome</parent>
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <date>1514761200000</date>
-  <contentUpdateDate>1514761200000</contentUpdateDate>
   <version>1.1</version>
   <title>$services.localization.render("awm.chartmacro.title")</title>
   <comment/>
@@ -42,7 +40,7 @@
 $services.localization.render("awm.chartmacro.desc")
 
 {{{
-{{awmchart app="Help.Applications.Movies" category="databaseList1" type="pie" title="Chart" width="500" height="500" table="1" /}}
+{{awmchart app="Help.Applications.Movies" category="databaseList1" type="pie" title="Chart" width="500" height="500" table="1" addParams="colors:C3E3F7,1D9FF5,015891,012A45" /}}
 }}}
 
 #macro(docline $field $defaultValue)
@@ -50,6 +48,7 @@ $services.localization.render("awm.chartmacro.desc")
 
 #end
 #set($defaultColors = "backgroundColor:FFFFFF;${util.newline}legendBackgroundColor:FFFFFF;${util.newline}borderColor:FFFFFF;${util.newline}plotBackgroundColor:FFFFFF;${util.newline}plotBorderColor:FFFFFF;${util.newline}plotBorderVisible:false")
+#set($defaultAddParams = "key:value;key:value")
 
 |= $services.localization.render("awm.chartmacro.doc.parameter") |= $services.localization.render("awm.chartmacro.doc.desc") |= $services.localization.render("awm.chartmacro.doc.defaultValue")
 #docline("app", "")
@@ -65,9 +64,10 @@ $services.localization.render("awm.chartmacro.desc")
 #docline("tableClasses", "col-md-6 col-sm-12")
 #docline("useRow", "1")
 #docline("colors", $defaultColors)
-#docline("addParams", "")
+|= addParams | $services.localization.render("rendering.macro.awmchart.parameter.addParams.description") |((($defaultAddParams)))
 #docline("fromHQL", "")
 #docline("whereHQL", "")
+#docline("havingHQL", "")
 #docline("function", "")
 #docline("aggregate", "")
 #docline("aggregateFunction", "sum")
@@ -75,16 +75,17 @@ $services.localization.render("awm.chartmacro.desc")
 #docline("orderDirection", "desc")
 #docline("columnTitle", "")
 #docline("aggregateTitle", "")
+#docline("nb", "50")
 
 == $services.localization.render("awm.chartmacro.example") ==
 
 === $services.localization.render("awm.chartmacro.example.simple") ===
 
 {{{
-{{awmchart app="Help.Applications.Movies" category="databaseList1" type="pie" title="Chart" width="500" height="500" table="1" chartClasses="col-md-6 col-sm-12" /}}
+{{awmchart app="Help.Applications.Movies" category="databaseList1" type="pie" title="Chart" width="500" height="500" table="1" chartClasses="col-md-6 col-sm-12" addParams="colors:C3E3F7,1D9FF5,015891,012A45" /}}
 }}}
 
-{{awmchart app="Help.Applications.Movies" category="databaseList1" type="pie" title="Chart" width="500" height="500" table="1" chartClasses="col-md-6 col-sm-12" /}}
+{{awmchart app="Help.Applications.Movies" category="databaseList1" type="pie" title="Chart" width="500" height="500" table="1" chartClasses="col-md-6 col-sm-12" addParams="colors:C3E3F7,1D9FF5,015891,012A45" /}}
 
 === $services.localization.render("awm.chartmacro.example.function") ===
 
@@ -229,6 +230,12 @@ $services.localization.render("awm.chartmacro.desc")
     </class>
     <property>
       <code>{{velocity}}
+## Verify programming right of the content author of the page embedding the macro.
+#set($docRef = $services.model.resolveDocument($doc.fullName))
+#set($doc = $xwiki.getDocument($docRef))
+#set($authorRef = $doc.getContentAuthorReference())
+#set($targetPageHasProg = $services.security.authorization.hasAccess('programming', $authorRef, $docRef))
+#set($debug = false)
 #**
  * Get the name of the Property that should be used for a given column.
  * NOTE the resulting $tableName is safe to use inside SQL queries
@@ -319,6 +326,10 @@ $services.localization.render("awm.chartmacro.desc")
  #set($appDoc = $xwiki.getDocument("${app}.WebHome"))
  #set($className = $appDoc.getValue("class"))
 #end
+#set($classDocRef = $services.model.resolveDocument($className))
+#set($currentUserRef = $xcontext.userReference)
+#set($canSeeExceptionDetails = $services.security.authorization.hasAccess('script', $currentUserRef, $docRef))
+#set($canViewClass = $services.security.authorization.hasAccess('view', $currentUserRef, $classDocRef))
 #if($xcontext.macro.params.category)
  #set($category = $xcontext.macro.params.category)
 #else
@@ -329,64 +340,130 @@ $services.localization.render("awm.chartmacro.desc")
 #else
 #set($chartTitle = "")
 #end
+#set($hasUnsafeQueryParameter = false)
+#set($unsafeQueryReason = "")
+#if(!$canViewClass)
+ #set($hasUnsafeQueryParameter = true)
+ #set($unsafeQueryReason = "${services.localization.render('awm.chartmacro.error.classNotVisible')} ${className}.")
+#end
+#set($aggregateFunction = "")
+#if($xcontext.macro.params.aggregateFunction &amp;&amp; $xcontext.macro.params.aggregateFunction!="")
+ #set($aggregateFunction = $xcontext.macro.params.aggregateFunction.toLowerCase())
+ #if(!$aggregateFunction.matches("^(count|sum|avg|min|max)$"))
+  #set($hasUnsafeQueryParameter = true)
+  #set($unsafeQueryReason = $services.localization.render("awm.chartmacro.error.invalidAggregateFunction"))
+ #end
+#end
 #set($aggProp = "count(distinct doc.fullName)")
 #set($aggWhere = "")
 #if($xcontext.macro.params.aggregate &amp;&amp; $xcontext.macro.params.aggregate!="")
  #set($aggregate = $xcontext.macro.params.aggregate)
  #if($aggregate.startsWith("doc.") || $aggregate.startsWith("distinct doc."))
-  #if($xcontext.macro.params.aggregateFunction &amp;&amp; $xcontext.macro.params.aggregateFunction!="")
-   #set($aggProp = "${xcontext.macro.params.aggregateFunction}(${aggregate})")  
-  #else
-   #set($aggProp = "count(${aggregate})")
+  #if(!$aggregate.matches("^(doc\\.[A-Za-z0-9_]+|distinct doc\\.[A-Za-z0-9_]+)$"))
+   #set($hasUnsafeQueryParameter = true)
+   #set($unsafeQueryReason = $services.localization.render("awm.chartmacro.error.invalidAggregate"))
+  #end
+  #if(!$hasUnsafeQueryParameter)
+   #if($aggregateFunction != "")
+    #set($aggProp = "${aggregateFunction}(${aggregate})")
+   #else
+    #set($aggProp = "count(${aggregate})")
+   #end
   #end
  #else
-  #chartmacro_getTableName($className $aggregate)
-  #set($aggTableName = ",${tableName} as aggprop")
-  #set($aggWhere = "and obj.id=aggprop.id.id and aggprop.id.name='${aggregate}'")
-  #if($xcontext.macro.params.aggregateFunction &amp;&amp; $xcontext.macro.params.aggregateFunction!="")
-    #set($aggProp = "${xcontext.macro.params.aggregateFunction}(aggprop.value)")  
+  #if(!$aggregate.matches("^[A-Za-z0-9_]+$"))
+   #set($hasUnsafeQueryParameter = true)
+   #set($unsafeQueryReason = $services.localization.render("awm.chartmacro.error.invalidAggregate"))
   #else
-    #set($aggProp = "sum(aggprop.value)")
+   #chartmacro_getTableName($className $aggregate)
+   #set($aggTableName = ",${tableName} as aggprop")
+   #set($aggWhere = "and obj.id=aggprop.id.id and aggprop.id.name='${aggregate}'")
+   #if($aggregateFunction != "")
+     #set($aggProp = "${aggregateFunction}(aggprop.value)")
+   #else
+     #set($aggProp = "sum(aggprop.value)")
+   #end
   #end
  #end
 #end
 #set($queryParams = [])
 #set($discard = $queryParams.add($className))
 #if($category.startsWith("doc."))
+ #set($docCategoryField = $category.substring(4))
+ #if($docCategoryField=="" || !$docCategoryField.matches("^[A-Za-z0-9_]+$"))
+  #set($hasUnsafeQueryParameter = true)
+  #set($unsafeQueryReason = $services.localization.render("awm.chartmacro.error.invalidCategory"))
+ #end
  #set($propAlias = $category)
  #set($tableName = "")
  #set($colWhere = "")
  #set($categoryPrettyName = $category)
 #else
- #chartmacro_getTableName($className $category)
- #if($className != $propFinalClassName)
-   ## in this case we have a linked field
-   #if($relationalStorage == 1)
-    #set($tableName = ", BaseObject as obj2, DBStringListProperty as fieldprop join fieldprop.list list2, ${tableName} as ${tableAlias}")   
-    #set($colWhere = "and obj.id=fieldprop.id.id and fieldprop.id.name=? and list2=obj2.name and obj2.className=? and obj2.id=prop.id.id and prop.id.name=?")
-   #else
-    #set($tableName = ", BaseObject as obj2, StringProperty as fieldprop, ${tableName} as ${tableAlias}")
-    #set($colWhere = "and obj.id=fieldprop.id.id and fieldprop.id.name='${propFinalName}' and fieldprop.value=obj2.name and obj2.className='${propFinalClassName}' and obj2.id=prop.id.id and prop.id.name='${propFinalSubFieldName}'")
-   #end
-   ##set($discard = $queryParams.add($propFinalName))
-   ##set($discard = $queryParams.add($propFinalClassName))
-   ##set($discard = $queryParams.add($propFinalSubFieldName))
- #else
-   #set($tableName = ",${tableName} as ${tableAlias}")
-   #set($colWhere = "and obj.id=prop.id.id and prop.id.name=?")
-   #set($discard = $queryParams.add($category))
+ #if(!$category.matches("^[A-Za-z0-9_]+$"))
+  #set($hasUnsafeQueryParameter = true)
+  #set($unsafeQueryReason = $services.localization.render("awm.chartmacro.error.invalidCategory"))
  #end
- #set($categoryPrettyName = $xwiki.getDocument($propFinalClassName).getxWikiClass().get($propFinalSubFieldName).getPrettyName())
+  #if(!$hasUnsafeQueryParameter)
+   #chartmacro_getTableName($className $category)
+   #if($className != $propFinalClassName)
+     ## in this case we have a linked field
+     #if(!$propFinalName.matches("^[A-Za-z0-9_]+$") || !$propFinalSubFieldName.matches("^[A-Za-z0-9_]+$"))
+      #set($hasUnsafeQueryParameter = true)
+      #set($unsafeQueryReason = $services.localization.render("awm.chartmacro.error.invalidLinkedField"))
+     #elseif(!$propFinalClassName.matches("^[A-Za-z0-9_:.-]+$"))
+      #set($hasUnsafeQueryParameter = true)
+      #set($unsafeQueryReason = $services.localization.render("awm.chartmacro.error.invalidLinkedClass"))
+     #else
+      #set($linkedClassDocRef = $services.model.resolveDocument($propFinalClassName))
+      #set($canViewLinkedClass = $services.security.authorization.hasAccess('view', $currentUserRef, $linkedClassDocRef))
+      #if(!$canViewLinkedClass)
+       #set($hasUnsafeQueryParameter = true)
+       #set($unsafeQueryReason = "${services.localization.render('awm.chartmacro.error.linkedClassNotVisible')} ${propFinalClassName}.")
+      #else
+       #if($relationalStorage == 1)
+        #set($tableName = ", BaseObject as obj2, DBStringListProperty as fieldprop join fieldprop.list list2, ${tableName} as ${tableAlias}")
+        #set($colWhere = "and obj.id=fieldprop.id.id and fieldprop.id.name=? and list2=obj2.name and obj2.className=? and obj2.id=prop.id.id and prop.id.name=?")
+       #else
+        #set($tableName = ", BaseObject as obj2, StringProperty as fieldprop, ${tableName} as ${tableAlias}")
+        #set($colWhere = "and obj.id=fieldprop.id.id and fieldprop.id.name=? and fieldprop.value=obj2.name and obj2.className=? and obj2.id=prop.id.id and prop.id.name=?")
+       #end
+       #set($discard = $queryParams.add($propFinalName))
+       #set($discard = $queryParams.add($propFinalClassName))
+       #set($discard = $queryParams.add($propFinalSubFieldName))
+       #set($categoryPrettyName = $xwiki.getDocument($propFinalClassName).getxWikiClass().get($propFinalSubFieldName).getPrettyName())
+      #end
+     #end
+    #else
+      #set($tableName = ",${tableName} as ${tableAlias}")
+      #set($colWhere = "and obj.id=prop.id.id and prop.id.name=?")
+      #set($discard = $queryParams.add($category))
+      #set($categoryPrettyName = $xwiki.getDocument($propFinalClassName).getxWikiClass().get($propFinalSubFieldName).getPrettyName())
+    #end
+   #end
 #end
 #if($xcontext.macro.params.columnTitle &amp;&amp; $xcontext.macro.params.columnTitle!="")
  #set($categoryPrettyName = $xcontext.macro.params.columnTitle)
 #end
 #if($xcontext.macro.params.function &amp;&amp; $xcontext.macro.params.function!="")
- #set($function = $xcontext.macro.params.function)
- #if($function.contains("("))
+ #set($functionRaw = $xcontext.macro.params.function)
+ #set($function = $functionRaw.toLowerCase().replace(" ", ""))
+ #set($isSafeDateFunction = false)
+ #if($function.matches("^(year|month|day|dayofmonth|dayofweek|dayofyear|week|hour|minute|second)$"))
+  #set($function = "${function}(prop.value)")
+  #set($isSafeDateFunction = true)
+ #elseif($function.matches("^([a-z_][a-z0-9_]*)\\((prop\\.value|doc\\.[A-Za-z0-9_]+)\\)$"))
+  #set($functionName = $function.replaceAll("^([a-z_][a-z0-9_]*)\\(.*$", "$1"))
+  #if($functionName.matches("^(year|month|day|dayofmonth|dayofweek|dayofyear|week|hour|minute|second)$"))
+   #set($isSafeDateFunction = true)
+  #end
+ #end
+ #if($isSafeDateFunction)
   #set($propAlias = $function)
+ #elseif($targetPageHasProg)
+  #set($propAlias = $functionRaw)
  #else
-  #set($propAlias = "${function}(${propAlias})")
+  #set($hasUnsafeQueryParameter = true)
+  #set($unsafeQueryReason = $services.localization.render("awm.chartmacro.error.invalidFunction"))
  #end
 #end
 #if($xcontext.macro.params.orderDirection &amp;&amp; $xcontext.macro.params.orderDirection=="asc")
@@ -399,26 +476,53 @@ $services.localization.render("awm.chartmacro.desc")
 #else
  #set($order = "order by 1 ${orderdir}")
 #end
-#set($nb = 0)
+#set($nb = 50)
 #if($xcontext.macro.params.nb)
  #set($nb = $util.parseInt($xcontext.macro.params.nb))
 #end
-#set($havingHQL = "")
-#if($xcontext.macro.params.havingHQL &amp;&amp; $xcontext.macro.params.havingHQL!="")
- #set($havingHQL = "having ${xcontext.macro.params.havingHQL}")
+#if($nb &lt;= 0)
+ #set($nb = 50)
+#elseif($nb &gt; 200)
+ #set($nb = 200)
 #end
-#set($query = "select $propAlias , ${aggProp} from XWikiDocument as doc, BaseObject as obj $!{tableName} $!{aggTableName} $!{xcontext.macro.params.fromHQL} where doc.fullName=obj.name and obj.className=? $!{colWhere} $!{aggWhere} $!{xcontext.macro.params.whereHQL} group by ${propAlias} ${havingHQL} ${order}")
-#if($request.debug)
+#set($fromHQL = "")
+#set($whereHQL = "")
+#set($havingHQL = "")
+#set($hasCustomHQL = false)
+#if(($xcontext.macro.params.fromHQL &amp;&amp; $xcontext.macro.params.fromHQL!="") || ($xcontext.macro.params.whereHQL &amp;&amp; $xcontext.macro.params.whereHQL!="") || ($xcontext.macro.params.havingHQL &amp;&amp; $xcontext.macro.params.havingHQL!=""))
+ #set($hasCustomHQL = true)
+ #if($targetPageHasProg)
+  #set($fromHQL = $!{xcontext.macro.params.fromHQL})
+  #set($whereHQL = $!{xcontext.macro.params.whereHQL})
+  #if($xcontext.macro.params.havingHQL &amp;&amp; $xcontext.macro.params.havingHQL!="")
+   #set($havingHQL = "having ${xcontext.macro.params.havingHQL}")
+  #end
+ #else
+  $services.localization.render("awm.chartmacro.exception"): $services.localization.render("awm.chartmacro.error.customHQLRequiresPR") $services.localization.render("awm.chartmacro.error.checkedPage") ${doc.fullName}, hasProgrammingRights=${targetPageHasProg}.
+ #end
+#end
+#set($query = "select $propAlias , ${aggProp} from XWikiDocument as doc, BaseObject as obj $!{tableName} $!{aggTableName} $!{fromHQL} where doc.fullName=obj.name and obj.className=? $!{colWhere} $!{aggWhere} $!{whereHQL} group by ${propAlias} ${havingHQL} ${order}")
+#if($hasUnsafeQueryParameter)
+ $services.localization.render("awm.chartmacro.exception"): $unsafeQueryReason
+#end
+#if($debug)
+$services.localization.render("awm.chartmacro.debug"): checked page=${doc.fullName}, hasProgrammingRights=${targetPageHasProg}
 $services.localization.render("awm.chartmacro.query"): {{{ ${query} ${queryParams} }}}
 #end
 #set($list = [])
+#if((!$hasCustomHQL || $targetPageHasProg) &amp;&amp; !$hasUnsafeQueryParameter)
 #try()
 #set($list = $xwiki.search($query, $nb, 0, $queryParams))
 #end
-#if($exception)
-$services.localization.render("awm.chartmacro.exception"): {{{ $exception }}}
 #end
-#if($request.debug)
+#if($exception)
+ #if($canSeeExceptionDetails)
+$services.localization.render("awm.chartmacro.exception"): {{{ $exception }}}
+ #else
+$services.localization.render("awm.chartmacro.exception"): $services.localization.render("awm.chartmacro.error.executionFailed")
+ #end
+#end
+#if($debug)
 $services.localization.render("awm.chartmacro.data"): $list
 #end
 #if($list &amp;&amp; $list.size()&gt;0)
@@ -447,15 +551,48 @@ $services.localization.render("awm.chartmacro.data"): $list
 (% class="row" %)
 (((
 #end
+#set($safeChartType = "line")
+#if($xcontext.macro.params.type)
+ #set($chartTypeCandidate = $xcontext.macro.params.type.toLowerCase().replace(' ', '').replace('"', '').replace("'", ""))
+ #if($chartTypeCandidate.matches("^[a-z][a-z0-9_-]*$"))
+  #set($safeChartType = $chartTypeCandidate)
+ #end
+#end
+#set($safeChartTitle = $chartTitle.replace('"', '').replace("'", ""))
+#set($safeWidth = "500")
+#if($xcontext.macro.params.width)
+ #set($widthCandidate = $xcontext.macro.params.width.replace(' ', '').replace('"', '').replace("'", ""))
+ #if($widthCandidate.matches("^[0-9]+(%|px)?$"))
+  #set($safeWidth = $widthCandidate)
+ #end
+#end
+#set($safeHeight = "500")
+#if($xcontext.macro.params.height)
+ #set($heightCandidate = $xcontext.macro.params.height.replace(' ', '').replace('"', '').replace("'", ""))
+ #if($heightCandidate.matches("^[0-9]+(%|px)?$"))
+  #set($safeHeight = $heightCandidate)
+ #end
+#end
+#set($safeChartClasses = "")
+#if($xcontext.macro.params.chartClasses)
+ #set($safeChartClasses = $xcontext.macro.params.chartClasses.replace('"', '').replace("'", ""))
+#end
+#set($safeTableClasses = "")
+#if($xcontext.macro.params.tableClasses)
+ #set($safeTableClasses = $xcontext.macro.params.tableClasses.replace('"', '').replace("'", ""))
+#end
 #if($showChart)
  #if($xcontext.macro.params.colors &amp;&amp; $context.macro.params.colors!="")
-  #set($colors = "colors:${xcontext.macro.params.colors};")
+  #set($safeColors = $xcontext.macro.params.colors.replace('"', '').replace("'", ""))
+  #set($colors = "colors:${safeColors};")
  #end
- #set($chartString = "chart type='${xcontext.macro.params.type}' source='inline' params='range:B2-B${nblines};series:columns;$!{colors}${xcontext.macro.params.addParams}' title='${chartTitle}' width='${xcontext.macro.params.width}' height='${xcontext.macro.params.height}'")
-#if($request.debug)
+ #set($chartParams = "range:B2-B${nblines};series:columns;$!{colors}$!{xcontext.macro.params.addParams}")
+ #set($safeChartParams = $chartParams.replace('"', '').replace("'", ""))
+ #set($chartString = "chart type='${safeChartType}' source='inline' params='${safeChartParams}' title='${safeChartTitle}' width='${safeWidth}' height='${safeHeight}'")
+#if($debug)
 $services.localization.render("awm.chartmacro.chart"): {{{ $chartString }}} 
 #end
-(% class="${xcontext.macro.params.chartClasses}" %)
+(% class="${safeChartClasses}" %)
 (((
 {{${chartString}}}
 |= ${categoryPrettyName} |= ${countPrettyName}
@@ -467,7 +604,9 @@ $services.localization.render("awm.chartmacro.chart"): {{{ $chartString }}}
 #end
 #if($value.contains("."))
  #set($valueDoc = $xwiki.getDocument($value))
- #if(!$valueDoc.isNew() &amp;&amp; $valueDoc.getTitle()!="")
+ #set($valueDocRef = $services.model.resolveDocument($valueDoc.fullName))
+ #set($canViewValueDoc = $services.security.authorization.hasAccess('view', $currentUserRef, $valueDocRef))
+ #if($canViewValueDoc &amp;&amp; !$valueDoc.isNew() &amp;&amp; $valueDoc.getTitle()!="")
   #set($value = $valueDoc.getTitle())
  #end
 #end
@@ -480,7 +619,7 @@ $services.localization.render("awm.chartmacro.chart"): {{{ $chartString }}}
 )))
 #end
 #if($showTable)
-(% class="${xcontext.macro.params.tableClasses}" %)
+(% class="${safeTableClasses}" %)
 (((
 |= ${categoryPrettyName} |= ${countPrettyName}
 #foreach($item in $list)
@@ -491,7 +630,9 @@ $services.localization.render("awm.chartmacro.chart"): {{{ $chartString }}}
 #end
 #if($value.contains("."))
  #set($valueDoc = $xwiki.getDocument($value))
- #if(!$valueDoc.isNew() &amp;&amp; $valueDoc.getTitle()!="")
+ #set($valueDocRef = $services.model.resolveDocument($valueDoc.fullName))
+ #set($canViewValueDoc = $services.security.authorization.hasAccess('view', $currentUserRef, $valueDocRef))
+ #if($canViewValueDoc &amp;&amp; !$valueDoc.isNew() &amp;&amp; $valueDoc.getTitle()!="")
   #set($value = $valueDoc.getTitle())
  #end
 #end
@@ -988,7 +1129,7 @@ $services.localization.render("awm.chartmacro.nodata")
       <defaultValue>backgroundColor:FFFFFF;legendBackgroundColor:FFFFFF;borderColor:FFFFFF;plotBackgroundColor:FFFFFF;plotBorderColor:FFFFFF;plotBorderVisible:false</defaultValue>
     </property>
     <property>
-      <description>additional Params added to the chart params</description>
+      <description>Additional chart parameters in format key=value|key=value. Entries are sanitized before injection.</description>
     </property>
     <property>
       <mandatory>0</mandatory>
@@ -1120,7 +1261,7 @@ $services.localization.render("awm.chartmacro.nodata")
       <defaultValue/>
     </property>
     <property>
-      <description>HQL to add to the from part of the HQL Query</description>
+      <description>Custom HQL fragment stored in page content; used only when the page containing the macro has Programming Rights.</description>
     </property>
     <property>
       <mandatory>0</mandatory>
@@ -1186,7 +1327,7 @@ $services.localization.render("awm.chartmacro.nodata")
       <defaultValue/>
     </property>
     <property>
-      <description>HQL to add to the where part of the HQL Query</description>
+      <description>Custom HQL fragment stored in page content; used only when the page containing the macro has Programming Rights.</description>
     </property>
     <property>
       <mandatory>0</mandatory>
@@ -1516,7 +1657,7 @@ $services.localization.render("awm.chartmacro.nodata")
       <defaultValue/>
     </property>
     <property>
-      <description>Function to use on the category field</description>
+      <description>Function on the category field. Without Programming Rights, only single-parameter date functions are allowed.</description>
     </property>
     <property>
       <mandatory>0</mandatory>
@@ -2041,10 +2182,10 @@ $services.localization.render("awm.chartmacro.nodata")
       </name>
     </class>
     <property>
-      <defaultValue/>
+      <defaultValue>50</defaultValue>
     </property>
     <property>
-      <description>Maximum number of items to retrieve from query</description>
+      <description>Maximum number of items to retrieve from query. Default is 50. Values less than or equal to 0 are reset to 50. Maximum is 200.</description>
     </property>
     <property>
       <mandatory>0</mandatory>
@@ -2176,7 +2317,7 @@ $services.localization.render("awm.chartmacro.nodata")
       <defaultValue/>
     </property>
     <property>
-      <description>HQL to add to the having part of the HQL Query</description>
+      <description>Custom HQL fragment stored in page content; used only when the page containing the macro has Programming Rights.</description>
     </property>
     <property>
       <mandatory>0</mandatory>

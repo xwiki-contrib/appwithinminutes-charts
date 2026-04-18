@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.1" encoding="UTF-8"?>
 
 <!--
  * See the NOTICE file distributed with this work for additional
@@ -20,24 +20,21 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
 -->
 
-<xwikidoc version="1.3" reference="AppWithinMinutes.Statistics.Translations" locale="">
+<xwikidoc version="1.3" reference="AppWithinMinutes.Statistics.Translations" locale="" encoding="UTF-8">
   <web>AppWithinMinutes.Statistics</web>
   <name>Translations</name>
   <language/>
   <defaultLanguage>en</defaultLanguage>
   <translation>0</translation>
   <creator>xwiki:XWiki.Admin</creator>
-  <creationDate>1514761200000</creationDate>
   <parent>AppWithinMinutes.Statistics.WebHome</parent>
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <date>1514761200000</date>
-  <contentUpdateDate>1514761200000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <comment/>
   <minorEdit>false</minorEdit>
-  <syntaxId>xwiki/2.1</syntaxId>
+  <syntaxId>plain/1.0</syntaxId>
   <hidden>true</hidden>
   <content>awm.chartmacro.title=AppWithinMinutes Chart Macro
 awm.chartmacro.desc=This macro allows to show chart and data tables for AppWithinMinutes applications.
@@ -56,6 +53,17 @@ awm.chartmacro.data=Data
 awm.chartmacro.chart=Chart
 awm.chartmacro.nodata=No data
 awm.chartmacro.number=Number
+awm.chartmacro.error.classNotVisible=Access denied: the current user cannot view class
+awm.chartmacro.error.invalidAggregateFunction=Invalid aggregateFunction parameter.
+awm.chartmacro.error.invalidAggregate=Invalid aggregate parameter.
+awm.chartmacro.error.invalidCategory=Invalid category parameter.
+awm.chartmacro.error.invalidFunction=Invalid function parameter. Only single-parameter date functions are allowed without Programming Rights.
+awm.chartmacro.error.customHQLRequiresPR=Custom HQL parameters are refused unless the page containing the macro has Programming Rights.
+awm.chartmacro.error.checkedPage=Checked page=
+awm.chartmacro.error.invalidLinkedField=Invalid linked field metadata for DBList field.
+awm.chartmacro.error.invalidLinkedClass=Invalid linked class metadata for DBList field.
+awm.chartmacro.error.linkedClassNotVisible=Access denied: the current user cannot view linked class
+awm.chartmacro.error.executionFailed=An internal error occurred while executing the chart query.
 rendering.macro.awmchart.name=AppWithinMinutes Chart Macro
 rendering.macro.awmchart.description=This macro allows to show chart and data tables for AppWithinMinutes applications
 rendering.macro.awmchart.parameter.app.name=Application Name
@@ -84,13 +92,15 @@ rendering.macro.awmchart.parameter.useRow.description=Display of a bootstrap row
 rendering.macro.awmchart.parameter.colors.name=Colors
 rendering.macro.awmchart.parameter.colors.description=Colors to use for the chart (separated by commas)
 rendering.macro.awmchart.parameter.addParams.name=Chart Additional parameters
-rendering.macro.awmchart.parameter.addParams.description=Additional parameters for the chart (see the [[Chart macro documentation&gt;&gt;url:http://extensions.xwiki.org/xwiki/bin/view/Extension/Chart%20Macro])
+rendering.macro.awmchart.parameter.addParams.description=Additional parameters for the chart in format key:value;key:value; (see the [[Chart macro documentation>>http://extensions.xwiki.org/xwiki/bin/view/Extension/Chart%20Macro]]).
 rendering.macro.awmchart.parameter.fromHQL.name=From HQL
-rendering.macro.awmchart.parameter.fromHQL.description=Additional HQL to add to the from part of the query
+rendering.macro.awmchart.parameter.fromHQL.description=Additional HQL to add to the from part of the query (requires Programming Rights)
 rendering.macro.awmchart.parameter.whereHQL.name=Where HQL
-rendering.macro.awmchart.parameter.whereHQL.description=Additional HQL to add to the where part of the query
+rendering.macro.awmchart.parameter.whereHQL.description=Additional HQL to add to the where part of the query (requires Programming Rights)
+rendering.macro.awmchart.parameter.havingHQL.name=Having HQL
+rendering.macro.awmchart.parameter.havingHQL.description=Additional HQL to add to the having part of the query (requires Programming Rights)
 rendering.macro.awmchart.parameter.function.name=Function
-rendering.macro.awmchart.parameter.function.description=Function to apply to the category field
+rendering.macro.awmchart.parameter.function.description=Function to apply to the category field. Non-date or multi-expression functions require Programming Rights.
 rendering.macro.awmchart.parameter.aggregate.name=Aggregate field
 rendering.macro.awmchart.parameter.aggregate.description=Aggregate field to use instead of count
 rendering.macro.awmchart.parameter.aggregateFunction.name=Aggregate Function
@@ -114,6 +124,15 @@ awm.statistics.type.line=Line
 awm.statistics.function=Function (optional):
 awm.statistics.aggregate=Aggregate (optional):
 awm.statistics.aggregateFunction=Aggregate Function (optional):
+awm.statistics.error.invalidQuotes=Invalid input: quotes are not allowed in parameter values.
+awm.statistics.error.invalidFunction=Invalid function. Allowed values are standard date functions (year, month, day, dayofmonth, dayofweek, dayofyear, week, hour, minute, second) optionally with one parameter.
+awm.statistics.error.invalidType=Invalid chart type.
+awm.statistics.error.invalidDirection=Invalid order direction.
+awm.statistics.error.invalidAggregateFunction=Invalid aggregate function.
+awm.statistics.error.appNotViewable=Access denied: selected application is not viewable.
+awm.statistics.error.classNotViewable=Access denied: selected class is not viewable.
+awm.statistics.error.invalidClass=Invalid class selection.
+awm.statistics.error.invalidProperty=Invalid property selection.
 awm.statistics.continue=Continue
 awm.statistics.insert=To insert this chart in another page use the following code:
 awm.statistics.chooseapp=Choose Application:
